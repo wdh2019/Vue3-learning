@@ -154,3 +154,338 @@ watch([counter, user],(newVal, oldVal)=>{
 });
 ```
 
+### 生命周期
+
+setup()函数中可以使用的生命周期如下：
+
+- onBeforeMount
+- onMounted
+- onBeforeUpdate
+- onUpdated
+- onBeforeUnmount
+- onUnmounted
+
+需要用`import`从`vue`中引入：
+
+```javascript
+import {onBeforeMount, onMounted, onBeforeUpdate, onUpdated, onBeforeUnmount, onUnmounted} from 'vue';
+```
+
+
+
+## Provide & Inject
+
+组件间可以通过`provide`函数和`inject`函数传值。
+
+- 使用`provide`传递值：
+
+```javascript
+const student = reactive({
+    name: 'xiaowang',
+    age: 21,
+    gender: '男'
+});
+provide('student', student);
+```
+
+- 使用`inject`接收值：
+
+```javascript
+const student = inject('student');
+// 对 student 进行操作
+```
+
+
+
+## 路由器
+
+<a href="https://next.router.vuejs.org/installation.html">Vue Router 官方链接</a>
+
+### 安装路由
+
+```bash
+npm install vue-router@next
+```
+
+### 基本路由
+
+router/index.js
+
+```javascript
+import {createRouter, createWebHashHistory} from 'vue-router';
+
+// 1. Define route components.
+const Home = { template: '<div>Home</div>' }
+const About = { template: '<div>About</div>' }
+
+// 2. Define some routes
+const routes = [
+  { path: '/', component: Home },
+  { path: '/about', component: About },
+]
+
+// 3. Create the router instance and pass the `routes` option
+const router = createRouter({
+  // 4. Provide the history implementation to use.
+  history: createWebHashHistory(),
+  routes, // short for `routes: routes`
+})
+
+export default router
+```
+
+### 使用路由
+
+main.js
+
+```javascript
+import router from './router'
+
+const app = createApp(App);
+
+//使用路由
+app.use(router);
+```
+
+
+
+### 路由匹配
+
+#### 动态路由
+
+通常用`:`后跟参数表示，参数会包含在$route.params中。
+
+````javascript
+{
+	path: '/news/:id', component: News
+}
+````
+
+#### 匹配全路由（用于404）
+
+```javascript
+{
+	path: '/:path(.*)*', component: NotFound
+}
+```
+
+#### 路由正则
+
+在括号中为参数指定自定义正则表达式。
+
+- 以下`id`参数总是数字
+
+```javascript
+{
+	path: '/news/:id(\\d+)', component: News
+}
+```
+
+#### 可重复参数
+
+匹配具有多个部分的路由。
+
+- `*`表示 0 或更多
+
+```javascript
+// 匹配 /, /one, /one/two, /one/two/three 等
+{ path: '/news/:id*' }
+```
+
+- `+`表示 1 或更多
+
+```javascript
+// 匹配 /one, /one/two, /one/two/three 等
+{ path: '/news/:id+' }
+```
+
+#### 可选参数
+
+将参数标记为可选。
+
+- `?`表示 0 或 1
+
+```javascript
+// 匹配 /news 和 /news/some-id
+{ path: '/news/:id?' }
+```
+
+
+
+### 嵌套路由
+
+`children`属性
+
+```javascript
+{ 
+    path: '/user/:id?', component: User, 
+    children:[
+        {
+            path: 'vertical',
+            component: Vertical
+        },
+        {
+            path: 'horizontal',
+            component: Horizontal
+        }
+    ] 
+}
+```
+
+
+
+### 路由跳转
+
+#### router-link
+
+```html
+<router-link to='/'>Go to Home</router-link>
+```
+
+#### this.$router.push
+
+用于页面跳转。
+
+- 可以携带参数。
+
+```javascript
+// literal string path
+router.push('/users/eduardo')
+
+// object with path
+router.push({ path: '/users/eduardo' })
+
+// named route with params to let the router build the url
+router.push({ name: 'user', params: { username: 'eduardo' } })
+
+// with query, resulting in /register?plan=private
+router.push({ path: '/register', query: { plan: 'private' } })
+
+// with hash, resulting in /about#team
+router.push({ path: '/about', hash: '#team' })
+```
+
+#### this.$router.replace
+
+用于替换当前页面。
+
+- 后退不到之前的一个页面，因为该页面已被替换掉。
+
+#### this.$router.go
+
+- `this.$router.go(1)`前进一个页面
+- `this.$router.go(-1)`后退一个页面
+
+
+
+### 命名路由
+
+`name`属性，可用于`$router.push`时跳转到指定的命名路由等。
+
+### 命名视图
+
+- `components`属性指定多个组件：
+
+```javascript
+{
+      path: '/',
+      components: {
+        default: Home,
+        // short for LeftSidebar: LeftSidebar
+        LeftSidebar,
+        // they match the `name` attribute on `<router-view>`
+        RightSidebar,
+      },
+},
+```
+
+- 为`router-view`添加`name`属性，在对应路由时显示匹配的组件：
+  - 按照以下配置，在路由为`/`时，才会显示以下三个`router-view`匹配的组件。
+
+```html
+<router-view class="view left-sidebar" name="LeftSidebar"></router-view>
+<router-view class="view main-content"></router-view>
+<router-view class="view right-sidebar" name="RightSidebar"></router-view>
+```
+
+
+
+### 重定向
+
+`redirect`属性
+
+#### 字符串
+
+```javascript
+{ path: '/home', redirect: '/' }
+```
+
+#### 命名路由
+
+```javascript
+{ path: '/home', redirect: { name: 'homepage' } }
+```
+
+#### 函数
+
+```javascript
+{
+	path: '/',
+	redirect: to => {
+		return { path: '/news', query: {q: to.params.id}}
+	}
+}
+```
+
+- 重定向后会**替换**URL。
+
+
+
+### 别名
+
+`alias`属性
+
+```javascript
+{ path: '/', component: Homepage, alias: '/home' }
+```
+
+- 在访问`/home`时，URL**不会被替换成** `/`，但仍然会像访问`/`一样。
+
+
+
+### 路由守卫
+
+#### 全局前置守卫
+
+`router.beforeEach`
+
+- 接收3个参数：to/from/next
+
+  - to：要跳转到的目标路由。
+  - from：当前正要跳转走的路由。
+  - next：可以传入参数并跳转。
+
+  ```javascript
+  router.beforeEach((to, from, next) => {
+    if (to.name !== 'Login' && !isAuthenticated) next({ name: 'Login' })
+    else next()
+  })
+  ```
+
+
+
+#### 单独的前置守卫
+
+`beforeEnter`
+
+```javascript
+{
+    path: '/users/:id',
+    component: UserDetails,
+    beforeEnter: (to, from) => {
+      // reject the navigation
+      return false
+    },
+}
+```
+

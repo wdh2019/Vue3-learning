@@ -1,14 +1,20 @@
 <template>
-  <composition-apis name="xiaoWang"/>
+  <!-- <composition-apis name="xiaoWang"/> -->
+  <!-- <composition-life-hooks /> -->
+  <provide-inject />
 </template>
 
 <script>
 import CompositionApis from './components/CompositionAPIs.vue'
+import CompositionLifeHooks from './components/CompositionLifeHooks.vue'
+import ProvideInject from './components/Provide_Inject.vue'
 
 export default {
   name:'App',
   components:{
-    CompositionApis
+    CompositionApis,
+    CompositionLifeHooks,
+    ProvideInject
   }
 }
 </script>
